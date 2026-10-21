@@ -112,7 +112,7 @@ Ngoài repo:
 - [ ] Cài được 7 plugin trên Claude Code và trên các loại tài khoản claude.ai đã ghi trong `docs/cai-dat.md`.
 - [ ] Eval 7 plugin đạt: chọn đúng skill ≥80%, có khối gợi ý ≥90%.
 - [ ] ChatGPT Plugin đạt 8/8 ca thử và đã nộp, hoặc có biên bản quyết định lùi tại mốc tuần 2.
-- [ ] Mỗi plugin chuyên sâu có ít nhất N item đã duyệt, đếm bằng `npm run check -- --summary` (N ở Validation Log).
+- [ ] Mỗi plugin chuyên sâu có ít nhất **35** item đã duyệt (tổng 210), đếm bằng `npm run check -- --summary`.
 - [ ] CI chặn 100% các trường hợp sau ở mọi file nguồn, mỗi luật có test âm tính:
   - link HVN viết tay;
   - link ngoài allowlist;
@@ -146,7 +146,7 @@ Ngoài repo:
 
 | Rủi ro | Biện pháp |
 |---|---|
-| OpenAI từ chối vì nội dung mang tính quảng cáo hoặc bán hàng số | Mức `relevant`. Chỉ link trang thông tin. Dự phòng hai bậc: `tools_disabled`, rồi `exclude_types`. Có mốc quyết định tuần 2. (P3, P4) |
+| OpenAI từ chối vì nội dung mang tính quảng cáo hoặc bán hàng số | Mức `relevant`. Chỉ link trang thông tin. Loại `chon-goi` ngay từ lần nộp đầu. Dự phòng: tắt `recommend_solutions`. Có mốc quyết định tuần 2. (P3, P4) |
 | Lộ dữ liệu khách hàng từ ticket | Chỉ soạn trong repo staging riêng tư. Tóm tắt ticket bằng lời gọi không công cụ. Quét PII nhiều lớp. Có runbook gỡ nội dung. (P1, P2) |
 | Chèn mã hoặc lệnh qua nội dung, PR hoặc chuỗi cung ứng | Whitelist loại file và domain link. Chặn lệnh nguy hiểm. CODEOWNERS toàn repo. CI chỉ có quyền đọc. Không dùng gray-matter. (P1) |
 | Năng lực duyệt không theo kịp ~210 item | Người duyệt có tên và số giờ. Mốc tuần 4 bằng số tuyệt đối. (P5) |
@@ -197,4 +197,33 @@ Ngoài repo:
 
 ### Session 1 — 2026-10-21
 
-_Đang chờ trả lời: N, người duyệt, giấy phép nội dung, cấu hình nộp ChatGPT, Anthropic directory, quyền truy cập của repo nội bộ._
+**Câu hỏi đã hỏi:** 6. **Người trả lời:** CEO.
+
+| # | Câu hỏi | Quyết định | Lan tới |
+|---|---|---|---|
+| 1 | Định mức N | **35 item cho mỗi plugin chuyên sâu (tổng 210).** Đã giữ nguyên dù có cảnh báo về năng lực duyệt; mốc tuần 4 ở P5 là van an toàn. | P5, Done means |
+| 2 | 2 người duyệt nội dung | **1 biên tập viên Content (#Valkyrie) + 1 kỹ thuật viên Service (#Witch).** Tên cụ thể và số giờ mỗi tuần do COO/CMO chỉ định trong tuần 1, rồi ghi bổ sung vào đây. | P1 (CODEOWNERS), P5 |
+| 3 | Giấy phép nội dung | **MIT cho mã. Nội dung © HVN GROUP:** được cài, dùng và mirror nội bộ, kể cả doanh nghiệp khách hàng; cấm tái phân phối công khai hay bán lại. | P1 |
+| 4 | Cấu hình nộp ChatGPT | **Giữ `recommend_solutions`, loại `chon-goi` (`exclude_types: [chon-goi]`).** Dự phòng: tắt `recommend_solutions`. | P1 (channels.yaml), P3, P4 |
+| 5 | Anthropic directory | **Không nộp ở đợt 1.** Xem xét lại sau 90 ngày. | Out of scope |
+| 6 | Quyền truy cập repo `hvn-customer-success-agent` | **Riêng tư.** Plan, báo cáo và skill soạn nội dung được phép nằm ở đây. | P2 |
+
+**Tác động:**
+- N = 35 nghĩa là khoảng 47 item mỗi tuần, mỗi người duyệt khoảng 2,5 giờ mỗi ngày.
+- Mốc cuối tuần 4: tổng item đã merge của 6 plugin phải đạt ít nhất **105**, nếu không CEO quyết định thêm người duyệt hoặc hạ N.
+
+### Verification Results
+- Claims checked: 21 (Standard tier, 7 phase), gồm tên file, tên trường, lệnh và đường dẫn được tham chiếu chéo giữa các phase và báo cáo nghiên cứu.
+- Verified: 21 | Failed: 0 | Unverified: 6. Các mục Unverified đã được gắn nhãn trong phase và có spike hoặc bước kiểm tra cụ thể:
+  - tên miền `mcp.hvn.vn`;
+  - URL trang đích trong catalog;
+  - key `annotations` của SDK v2;
+  - phiên bản spec MCP mà ChatGPT dùng;
+  - gói ChatGPT hỗ trợ custom MCP;
+  - Việt Nam có trong danh sách quốc gia phát hành.
+- Tier: Standard. Repo đang trống mã nguồn, nên việc kiểm chứng dựa trên các file plan và báo cáo nghiên cứu.
+
+### Whole-Plan Consistency Sweep
+- Đã thay `exclude_types: []` bằng `[chon-goi]` (P1). Phương án dự phòng của P4 rút còn một bậc. Bảng rủi ro trong `plan.md` đã cập nhật.
+- Đã điền N=35 vào Done means. Đã ghi vai trò người duyệt ở P1 và P5. Đã ghi giấy phép ở P1.
+- Không còn tham chiếu nào tới một mục "Validation" chưa tồn tại.

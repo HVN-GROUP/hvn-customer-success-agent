@@ -46,7 +46,7 @@ dist/content-index.json                       # SINH TỰ ĐỘNG, KHÔNG commit
 docs/                                         # cai-dat.md, runbook-go-noi-dung.md, content-style.md
 .github/workflows/ci.yml, mirror.yml
 .github/CODEOWNERS, pull_request_template.md
-LICENSE, README.md
+LICENSE, LICENSE-CONTENT.md, README.md          # MIT cho mã; nội dung © HVN GROUP, cho phép cài/dùng/mirror nội bộ, cấm tái phân phối công khai hay bán lại
 ```
 
 Nội dung trong `plugins/<plugin>/` chỉ được phép gồm `.claude-plugin/plugin.json`, `README.md`, `skills/*/SKILL.md` và `skills/*/references/*.md`. Build chỉ sinh đúng các file này, và `check.ts` từ chối mọi file khác: `hooks/`, `bin/`, `.mcp.json`, `commands/`, `agents/`, `settings.json`, symlink.
@@ -77,7 +77,7 @@ solutions:
 ```yaml
 claude:  { upsell: strong,   max_items: 3, utm_source: claude }                      # plugin Claude (build)
 chatgpt: { upsell: relevant, max_items: 1, utm_source: chatgpt, mcp: true,
-           exclude_types: [], tools_disabled: [] }                                   # MCP /mcp/chatgpt
+           exclude_types: [chon-goi], tools_disabled: [] }                           # MCP /mcp/chatgpt — đã chốt ở Validation Log
 email:   { utm_source: email, utm_medium: whmcs }      # chỉ dùng cho link trong email (Phase 7)
 utm:
   source_enum: [claude, chatgpt, email]                 # thêm kênh mới = thêm vào đây
@@ -90,7 +90,7 @@ utm:
 
 - Phase 3 và Phase 6 đọc chung file này.
 - Kênh không có trong file thì không tồn tại: server trả 404, CI báo lỗi.
-- Giá trị `exclude_types` và `tools_disabled` của ChatGPT được chốt ở Validation.
+- ChatGPT loại nội dung `chon-goi` ngay từ lần nộp đầu, vẫn giữ `recommend_solutions` (Validation Log, Session 1).
 
 **Frontmatter của SKILL.md nguồn** (bộ trường hợp lệ trên claude.ai):
 
@@ -157,7 +157,7 @@ Lệnh `--summary` in số item theo plugin và theo loại; đây là nguồn s
    - (a) Thêm marketplace thử nghiệm trên claude.ai với 4 loại tài khoản: Free, Pro, thành viên Team và Owner Team. Ghi lại ai thêm được, và khi repo đổi thì bản cài trên claude.ai có tự cập nhật hay không.
    - (b) Chạy `claude plugin validate` trên runner GitHub mà không đăng nhập, với phiên bản CLI ghim.
    - (c) Xác nhận HVN sở hữu tổ chức GitHub `hvngroup`. Đăng ký các tên dễ nhầm (`hvn-group`, `hvngroup-vn`). Bật verified domain `hvn.vn` và bắt buộc 2FA.
-2. Tạo 2 repo theo bảng trên.
+2. Tạo 2 repo theo bảng trên. Thêm `LICENSE` (MIT, cho mã) và `LICENSE-CONTENT.md` (nội dung © HVN GROUP; được cài, dùng và mirror nội bộ, kể cả doanh nghiệp khách hàng; cấm tái phân phối công khai hay bán lại). `plugin.json` đặt `license` trỏ tới file này.
    - Staging: bật branch protection (bắt buộc PR, CI xanh, 1 approval của CODEOWNERS, chỉ squash-merge, bật merge queue, áp cho cả admin, tự hủy approval khi có commit mới).
    - Công khai: chỉ deploy key của workflow mirror được push; tắt Issues và PR từ bên ngoài, trỏ hỗ trợ về `kythuat@hvn.vn`.
 3. Khởi tạo Node 24 LTS, TypeScript và vitest. Phụ thuộc: `yaml` (parse frontmatter bằng cách tự tách khối `---`; **không dùng gray-matter**, và từ chối mọi fence khác `---`), `zod`. Lockfile commit.
@@ -167,7 +167,7 @@ Lệnh `--summary` in số item theo plugin và theo loại; đây là nguồn s
 7. Viết `scripts/check.ts`. Mỗi luật có ít nhất 1 test âm tính, dùng fixture **tổng hợp** (không phải dữ liệu thật).
 8. CODEOWNERS:
    - `*` thuộc nhóm kỹ thuật.
-   - `/content/**` thuộc nhóm duyệt nội dung.
+   - `/content/**` thuộc nhóm duyệt nội dung: 1 biên tập viên Content (#Valkyrie) và 1 kỹ thuật viên Service (#Witch), tên cụ thể ghi ở Validation Log.
    - `/content/**/tuan-thu-*` hoặc item `type: tuan-thu` thuộc HVN Security. CODEOWNERS khớp theo đường dẫn, nên nội dung tuân thủ đặt trong skill có tiền tố `tuan-thu-`.
    - `/.github/`, `/scripts/`, `/shared/`, `/server/`, `/config/`, `/catalog/`, `/snippets/`, `/Dockerfile`, `/deploy/` thuộc nhóm kỹ thuật kèm người phụ trách bảo mật.
 9. CI `ci.yml`:

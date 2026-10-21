@@ -74,11 +74,8 @@ Thiết kế đã áp dụng để đáp ứng các ràng buộc trên:
 4. Đặt `OPENAI_DOMAIN_TOKEN` trên production và xác minh domain.
 5. Soạn `listing.md`, đối chiếu từng dòng với quy định; đặt `commerce: false`; xác nhận Việt Nam có trong danh sách quốc gia phát hành (UNVERIFIED).
 6. **Mốc quyết định cuối tuần 2** (CEO): nếu tổ chức chưa xác minh xong hoặc trang pháp lý chưa được duyệt, ChatGPT rời khỏi Done means của đợt 1 và nộp ngay khi đủ điều kiện. Phase 7 vẫn ra mắt Claude đúng hạn.
-7. Nộp hồ sơ **trước cuối tuần 4** theo cấu hình kênh đã chốt ở Validation. Phản hồi reviewer trong 2 ngày làm việc.
-8. Nếu bị từ chối vì nội dung mang tính quảng cáo:
-   - Bậc 1: thêm `recommend_solutions` vào `tools_disabled`.
-   - Bậc 2: thêm `chon-goi` vào `exclude_types`.
-   - Mỗi bậc là một thay đổi cấu hình đi qua PR, CD và deploy. Lưu ý: nộp lại sẽ bắt đầu một vòng duyệt mới, thời gian không được công bố.
+7. Nộp hồ sơ **trước cuối tuần 4** theo cấu hình kênh đã chốt ở Validation Log. Phản hồi reviewer trong 2 ngày làm việc.
+8. Lần nộp đầu đã loại `chon-goi` (`exclude_types: [chon-goi]`) và giữ `recommend_solutions` (Validation Log). Nếu vẫn bị từ chối vì nội dung mang tính quảng cáo, thêm `recommend_solutions` vào `tools_disabled` rồi nộp lại, tức chỉ còn `search` và `fetch`. Đây là một thay đổi cấu hình đi qua PR, CD và deploy. Lưu ý: nộp lại sẽ bắt đầu một vòng duyệt mới, thời gian không được công bố.
 
 ## Verification
 
@@ -96,4 +93,4 @@ Thiết kế đã áp dụng để đáp ứng các ràng buộc trên:
 ## Risks
 
 - **Thời gian duyệt không được công bố.** Phase 7 không chờ được duyệt; khách ChatGPT chỉ nhận link sau khi plugin được duyệt.
-- **Bị từ chối.** Đã có phương án hai bậc ở bước 8. Mức "chủ động mạnh" chỉ áp dụng trên marketplace Claude do HVN tự host.
+- **Bị từ chối.** Đã có phương án dự phòng ở bước 8. Mức "chủ động mạnh" chỉ áp dụng trên marketplace Claude do HVN tự host.

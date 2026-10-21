@@ -32,7 +32,7 @@ Mỗi plugin chuyên sâu đạt tối thiểu **N item đã duyệt** (giá tr�
 
 Ví dụ với N=35: 6 plugin × 35 = **210 item** trong khoảng 4,5 tuần, tức khoảng 47 item mỗi tuần. 6 item đã có từ Phase 1 không đổi đáng kể con số này. Năng lực cần có:
 
-- **2 người duyệt nội dung**, mỗi người khoảng 24 item mỗi tuần, tương đương khoảng 5 item mỗi ngày làm việc. Ước tính 30 phút mỗi item kể cả đối chiếu nguồn, tức khoảng **2,5 giờ mỗi ngày mỗi người**.
+- **2 người duyệt nội dung**: 1 biên tập viên Content (#Valkyrie) lo giọng văn và brand, 1 kỹ thuật viên Service (#Witch) lo độ đúng kỹ thuật. Mỗi người khoảng 24 item mỗi tuần, tương đương khoảng 5 item mỗi ngày làm việc. Ước tính 30 phút mỗi item kể cả đối chiếu nguồn, tức khoảng **2,5 giờ mỗi ngày mỗi người**.
 - **Người duyệt tuân thủ (HVN Security):** 30 item trong 4,5 tuần, khoảng 7 item mỗi tuần.
 - Tên người và số giờ mỗi tuần được ghi ở Validation Log, và CEO duyệt trong tuần 1.
 
