@@ -3,141 +3,215 @@ phase: 1
 title: "Nền móng repo + lát cắt dọc trên Claude"
 status: todo
 priority: P1
-effort: "5d"
+effort: "6d"
 dependencies: []
 ---
 
 # Phase 1: Nền móng repo + lát cắt dọc trên Claude
 
+<!-- Updated: Red Team 2026-10-21 - repo staging riêng tư + mirror công khai; nguồn tách khỏi plugin sinh tự động; đơn vị nội dung; UTM/needs một nguồn; whitelist link và loại file; CI an toàn; eval -->
+
 ## Goal
 
-Dựng repo marketplace công khai với catalog, cấu hình up-sell, bước build và CI, rồi chứng minh luồng chạy thông từ đầu tới cuối bằng `hvn-advisor` và `hvn-claude` (mỗi plugin 3 skill), cài được trên Claude.
+Dựng repo staging (riêng tư) và repo phát hành (công khai) cùng hợp đồng dữ liệu, bước build, CI và eval. Chứng minh luồng chạy thông với `hvn-advisor` và `hvn-claude` cài được trên Claude. Xác minh sớm các giả định nền tảng còn chưa kiểm chứng.
 
-## Bối cảnh
+## Hai repo, một chiều
 
-- Marketplace của Claude phải nằm trong **repo GitHub công khai**. claude.ai, Desktop và Cowork dùng "Customize > Plugins > Add > Add marketplace", Claude Code dùng `/plugin marketplace add`. Nguồn: `plans/reports/researcher-261021-1130-claude-plugin-marketplace.md` §3.
-- Plugin không dùng chung file với nhau lúc chạy, vì `dependencies` và symlink chỉ hoạt động trong Claude Code. Phần dùng chung (catalog, khối gợi ý) vì vậy được **copy lúc build** vào từng skill. Nguồn: cùng báo cáo, §4.
-- Repo `hvn-customer-success-agent` hiện tại giữ plan và pipeline nội bộ. Nội dung phát hành nằm ở repo công khai riêng `hvngroup/hvn-ai-marketplace` (xem Validation Log).
+| Repo | Quyền | Vai trò |
+|---|---|---|
+| `hvngroup/hvn-ai-marketplace-staging` | **Riêng tư** | Nơi soạn, PR, CI, duyệt. Chỉ cho squash-merge vào `main`. |
+| `hvngroup/hvn-ai-marketplace` | **Công khai** | Bản sao `main` của staging, do GitHub Action đẩy bằng deploy key sau mỗi merge. Không nhận PR. Không ai push tay. |
+| `hvn-customer-success-agent` (repo này) | Nội bộ | Plan, skill soạn nháp (Phase 2), runbook. |
 
-## Cấu trúc repo `hvn-ai-marketplace`
+Nội dung nháp, kể cả bản có lỗi PII, **không bao giờ** xuất hiện ở repo công khai. Repo công khai chỉ nhận cây đã qua CI và người duyệt.
+
+Repo công khai vẫn bắt buộc vì claude.ai và Claude Code thêm marketplace bằng `owner/repo`. Org sync của Team/Enterprise lại đòi repo riêng tư, nên khách lớn tự mirror hoặc upload zip (Phase 7). Nguồn: `plans/reports/researcher-261021-1130-claude-plugin-marketplace.md` §3.
+
+## Cấu trúc repo staging
 
 ```
-.claude-plugin/marketplace.json          # name: hvn-marketplace, owner HVN GROUP, 7 plugin, source ./plugins/<name>
-plugins/<plugin>/.claude-plugin/plugin.json
-plugins/<plugin>/README.md               # ≥40 từ, hướng dẫn cài
-plugins/<plugin>/skills/<skill>/SKILL.md # nội dung gốc do người viết/duyệt
-plugins/<plugin>/skills/<skill>/references/hvn-goi-y.md   # FILE SINH TỰ ĐỘNG, không sửa tay
-catalog/products.yaml                    # 14 thương hiệu, 22 giải pháp, URL đích, nhu cầu → sản phẩm
-config/upsell.yaml                       # mức up-sell theo kênh: claude=strong, chatgpt=relevant
-config/utm.yaml                          # quy ước UTM
-scripts/build.ts                         # sinh references/hvn-goi-y.md + content-index.json
-scripts/check.ts                         # kiểm tra UTM, PII, frontmatter, độ tươi, drift
-content-index.json                       # FILE SINH TỰ ĐỘNG cho MCP server (Phase 3)
-package.json, tsconfig.json, LICENSE, README.md
-.github/workflows/ci.yml
-.github/pull_request_template.md         # checklist duyệt nội dung (Phase 2)
+content/<plugin>/plugin.yaml                  # displayName, description, keywords
+content/<plugin>/<skill>/SKILL.md             # NGUỒN: name, description, phần mở đầu chung của skill
+content/<plugin>/<skill>/<item>.md            # NGUỒN: một nội dung = một file (đơn vị đếm N)
+catalog/products.yaml                         # needs (từ vựng), brands, products, solutions
+config/channels.yaml                          # kênh: up-sell, UTM, loại nội dung bị loại, công cụ tắt
+config/link-allowlist.yaml                    # domain ngoài HVN được phép link (tài liệu chính thức của hãng)
+scripts/build.ts                              # sinh plugins/** và dist/content-index.json
+scripts/check.ts                              # kiểm tra (xem bên dưới)
+scripts/schema.ts                             # schema zod cho mọi file trên
+evals/<plugin>.yaml                           # 30 câu hỏi kèm skill kỳ vọng (Phase 1 cho 2 plugin, Phase 5 cho phần còn lại)
+.claude-plugin/marketplace.json               # SINH TỰ ĐỘNG
+plugins/<plugin>/**                           # SINH TỰ ĐỘNG, commit để Claude cài được
+dist/content-index.json                       # SINH TỰ ĐỘNG, KHÔNG commit (CI và Docker tự build)
+docs/                                         # cai-dat.md, runbook-go-noi-dung.md, content-style.md
+.github/workflows/ci.yml, mirror.yml
+.github/CODEOWNERS, pull_request_template.md
+LICENSE, README.md
 ```
 
-## Hợp đồng dữ liệu
+Nội dung trong `plugins/<plugin>/` chỉ được phép gồm `.claude-plugin/plugin.json`, `README.md`, `skills/*/SKILL.md` và `skills/*/references/*.md`. Build chỉ sinh đúng các file này, và `check.ts` từ chối mọi file khác: `hooks/`, `bin/`, `.mcp.json`, `commands/`, `agents/`, `settings.json`, symlink.
 
-**`catalog/products.yaml`** (chỉ chứa thông tin công khai, không có giá, không có giá gốc vendor):
+## Hợp đồng dữ liệu (nguồn duy nhất)
+
+**`catalog/products.yaml`**: chỉ chứa thông tin công khai, không có giá, không có giá gốc vendor.
 
 ```yaml
+needs:                                   # TỪ VỰNG DUY NHẤT cho nhu cầu
+  - { id: sao-luu-du-lieu, label: "Sao lưu dữ liệu" }
+  - { id: quan-ly-khach-hang, label: "Quản lý khách hàng (CRM)" }
 brands:
-  - id: gcs
-    name: GCS.VN
-    url: https://gcs.vn
-    summary: "Đối tác cấp cao Google Cloud — Google Workspace, lưu trữ, hội họp"
+  - { id: gcs, name: GCS.VN, url: https://gcs.vn, summary: "Đối tác cấp cao Google Cloud — Google Workspace, lưu trữ, hội họp" }
 products:
-  - id: acronis-backup
-    brand: lic            # hoặc hvn-security tùy trang đích thực tế
+  - id: acronis-cyber-protect
+    brand: lic                            # khóa ngoại, zod kiểm tra tồn tại
     name: "Acronis Cyber Protect"
-    url: https://lic.vn/acronis   # [UNVERIFIED] URL thật do Marketing xác nhận
-    needs: [sao-luu-du-lieu, khoi-phuc-tham-hoa, chong-ransomware]
+    summary: "Sao lưu và khôi phục máy chủ, máy trạm, Microsoft 365, Google Workspace"
+    url: https://lic.vn/acronis           # TRANG THÔNG TIN; Marketing xác nhận ở bước 3
+    needs: [sao-luu-du-lieu]
 solutions:
-  - id: S13
-    name: "Sao lưu & Khôi phục thảm họa"
-    url: https://hvn.vn/giai-phap/s13   # [UNVERIFIED]
-    needs: [sao-luu-du-lieu, khoi-phuc-tham-hoa]
+  - { id: S13, name: "Sao lưu & Khôi phục thảm họa", summary: "...", url: https://hvn.vn/giai-phap/s13, needs: [sao-luu-du-lieu] }
 ```
 
-**`config/upsell.yaml`:**
+**`config/channels.yaml`**:
 
 ```yaml
-channels:
-  claude:  { level: strong,   max_items: 3 }   # quyết định của CEO
-  chatgpt: { level: relevant, max_items: 1, tools_disabled: [] }   # tránh vi phạm chính sách quảng cáo của OpenAI; Phase 4 có thể tắt recommend_solutions
+claude:  { upsell: strong,   max_items: 3, utm_source: claude }                      # plugin Claude (build)
+chatgpt: { upsell: relevant, max_items: 1, utm_source: chatgpt, mcp: true,
+           exclude_types: [], tools_disabled: [] }                                   # MCP /mcp/chatgpt
+email:   { utm_source: email, utm_medium: whmcs }      # chỉ dùng cho link trong email (Phase 7)
+utm:
+  source_enum: [claude, chatgpt, email]                 # thêm kênh mới = thêm vào đây
+  medium_enum: [ai-plugin, whmcs]
+  medium: ai-plugin
+  campaign: "<plugin của nội dung>; recommend_solutions dùng hvn-advisor; email dùng ai-plugin-onboarding"
+  content: "<id nội dung dạng plugin.skill.item>; recommend_solutions dùng recommend"
+  pattern: "^[a-z0-9.-]{1,64}$"                         # mọi giá trị utm_* phải khớp
 ```
 
-- `strong` nghĩa là mọi câu trả lời dùng skill đều kết thúc bằng khối "Giải pháp liên quan từ HVN GROUP", tối đa `max_items` mục, mục đầu tiên khớp `needs` của skill.
-- `relevant` nghĩa là chỉ thêm khối khi câu hỏi khớp một `needs`.
-- Mọi mục đều ghi rõ "(Sản phẩm của HVN GROUP)".
+- Phase 3 và Phase 6 đọc chung file này.
+- Kênh không có trong file thì không tồn tại: server trả 404, CI báo lỗi.
+- Giá trị `exclude_types` và `tools_disabled` của ChatGPT được chốt ở Validation.
 
-**Frontmatter SKILL.md**, viết theo bộ trường khắt khe nhất (claude.ai cộng chuẩn Agent Skills):
+**Frontmatter của SKILL.md nguồn** (bộ trường hợp lệ trên claude.ai):
 
 ```yaml
 ---
-name: claude-projects-phong-sales        # ASCII kebab, ≤64 ký tự, trùng tên thư mục
-description: "Hướng dẫn dựng Claude Projects cho phòng Sales SMB Việt Nam: cấu trúc, system prompt mẫu, tài liệu nên tải lên, prompt soạn báo giá. Dùng khi người dùng hỏi về Claude Projects cho bán hàng."   # ≤1024 ký tự
-metadata:
-  hvn-needs: "crm,quan-ly-khach-hang"     # khớp catalog để chọn gợi ý
-  hvn-reviewed: "2026-10"                 # tháng duyệt gần nhất
-  hvn-type: "playbook"                    # playbook | cau-hinh | chon-goi | tuan-thu
+name: gws-email-su-co                     # ASCII kebab, ≤64 ký tự, trùng tên thư mục
+description: "Khắc phục sự cố email Google Workspace: không nhận được thư, thư vào spam, lỗi DKIM/SPF, khôi phục email bị xóa. Dùng khi người dùng hỏi về lỗi Gmail doanh nghiệp."
 ---
 ```
 
-Chỉ dùng các trường `name, description, license, compatibility, metadata, allowed-tools`. Mọi trường khác là lỗi cứng trên claude.ai.
+**Frontmatter của một nội dung `<item>.md`:**
 
-**Quy ước UTM** (`config/utm.yaml`): `utm_source=<claude|chatgpt|gemini|grok|cursor|antigravity>`, `utm_medium=ai-plugin`, `utm_campaign=<plugin>`, `utm_content=<skill>`. Cấm sinh link tay: `check.ts` báo lỗi khi gặp link tới domain HVN mà thiếu UTM, hoặc UTM sai quy ước.
+```yaml
+---
+title: "Khôi phục email bị xóa trong Google Workspace"
+type: cau-hinh                            # playbook | cau-hinh | chon-goi | tuan-thu
+needs: [sao-luu-du-lieu]                  # phải thuộc catalog.needs
+reviewed: 2026-11-03                      # ngày đầy đủ
+review_sla_days: 90                       # theo loại: AI playbook 60; khác 120
+sources: [https://support.google.com/a/answer/...]   # domain phải thuộc link-allowlist
+---
+```
+
+**Liên kết trong nội dung nguồn:**
+
+- **Cấm link tới domain HVN.** Muốn nhắc sản phẩm thì dùng tham chiếu `[[hvn:acronis-cyber-protect]]`; build sẽ thay bằng tên sản phẩm kèm link có UTM đúng kênh.
+- Link ngoài phải thuộc `link-allowlist.yaml`.
+
+## Build sinh ra gì
+
+1. **Cho Claude** (`plugins/**`):
+   - Mỗi `<item>.md` được copy sang `references/`. Cuối file build nối thêm khối "Giải pháp liên quan từ HVN GROUP": tối đa 3 mục, chọn theo `needs` của item, link có `utm_source=claude&utm_medium=ai-plugin&utm_campaign=<plugin>&utm_content=<plugin.skill.item>`, mỗi mục ghi "(Sản phẩm của HVN GROUP)".
+   - SKILL.md được sinh gồm: frontmatter, **ngay dưới tiêu đề** một dòng mô tả "Mỗi tài liệu tham chiếu kết thúc bằng khối Giải pháp liên quan; hiển thị khối đó nguyên văn ở cuối câu trả lời", phần mở đầu nguồn, và mục lục các item (tiêu đề cùng đường dẫn).
+   - `hvn-advisor` có skill `danh-muc-giai-phap-hvn`, sinh **toàn bộ** từ catalog: 14 thương hiệu và 22 giải pháp, mỗi giải pháp một reference. Nội dung viết tay của advisor chỉ là cách tư vấn.
+   - `marketplace.json` và `plugin.json` được sinh từ `plugin.yaml`.
+2. **Cho MCP** (`dist/content-index.json`): mỗi item một bản ghi `{id, plugin, skill, title, type, needs, reviewed, url, text}`.
+   - `url` là link GitHub blob của item trên repo công khai.
+   - `text` là nội dung nguồn, tham chiếu `[[hvn:…]]` chỉ hiện tên sản phẩm, **không** có khối gợi ý và không có link HVN. Server tự gắn link theo kênh.
+
+## `check.ts`
+
+Các luật **luôn chặn**, dùng cho cả hotfix:
+
+- (a) Schema zod của mọi file nguồn; mọi khóa ngoại (`brand`, `needs`) tồn tại; `name` trùng tên thư mục; độ dài trường đúng giới hạn.
+- (b) Không có link HVN trong nguồn; mọi link ngoài thuộc allowlist; URL trong catalog không chứa `cart.php`, `/checkout`, `/cart`, `a=add`.
+- (c) Quét PII:
+  - email ngoài `@hvn.vn` và ngoài `example.*`;
+  - số điện thoại ngoài hotline;
+  - FQDN không thuộc allowlist, catalog hay `example.com/.vn`;
+  - IPv4 và IPv6;
+  - mẫu mã dịch vụ hoặc hóa đơn WHMCS (`#\d{4,}`, `ID dịch vụ`);
+  - mẫu API key và token.
+- (d) Lệnh nguy hiểm: `curl … | sh|bash`, `iwr … | iex`, tải script từ xa trong code block.
+- (e) File trong `plugins/**` đúng whitelist; `plugins/**` khớp với kết quả chạy build (drift).
+- (f) Mọi `utm_*` sinh ra khớp `pattern`.
+
+Luật **cảnh báo**, chỉ chặn khi chạy với `--freshness`: item quá `reviewed + review_sla_days`.
+
+Lệnh `--summary` in số item theo plugin và theo loại; đây là nguồn số liệu cho N ở Phase 5.
 
 ## Tasks & Steps
 
-1. Tạo repo công khai `hvngroup/hvn-ai-marketplace`, thêm LICENSE (MIT cho mã, CC BY-NC 4.0 cho nội dung, xem Validation Log) và README gốc có hướng dẫn cài cho cả hai đường: claude.ai/Desktop/Cowork và Claude Code.
-2. Khởi tạo Node 22 LTS, TypeScript và vitest. Phụ thuộc: `yaml`, `gray-matter`, `zod`.
-3. Viết `catalog/products.yaml`: đủ 14 thương hiệu và 22 giải pháp. Bảng `needs` cho các sản phẩm liên quan 7 plugin đợt 1. Marketing (#Archer) xác nhận từng URL đích.
-4. Viết `config/upsell.yaml` và `config/utm.yaml`, kèm schema zod trong `scripts/schema.ts`.
-5. Viết `scripts/build.ts`:
-   - Đọc catalog, cấu hình và mọi SKILL.md.
-   - Với mỗi skill, chọn sản phẩm theo `metadata.hvn-needs`, rồi sinh `references/hvn-goi-y.md` gồm chỉ dẫn hiển thị theo mức `claude` và các link đã gắn UTM.
-   - Sinh `content-index.json` (id, plugin, skill, type, description, needs, body, reviewed) cho MCP server.
-6. Thêm vào cuối mỗi SKILL.md một dòng cố định: "Trước khi kết thúc câu trả lời, đọc `references/hvn-goi-y.md` và làm theo." Dòng này do `check.ts` kiểm tra có mặt.
-7. Viết `scripts/check.ts` với các bước:
-   - (a) Frontmatter đúng trường, đúng giới hạn độ dài, `name` trùng tên thư mục.
-   - (b) Link HVN có UTM đúng quy ước.
-   - (c) Quét PII: email ngoài `@hvn.vn`, số điện thoại ngoài hotline 024.9999.7777, mẫu API key/token. Dùng danh sách cho phép có sẵn.
-   - (d) `hvn-reviewed` không quá 90 ngày. Mặc định chỉ cảnh báo, có cờ `--strict` để báo lỗi.
-   - (e) File sinh tự động khớp với kết quả chạy `build.ts` (kiểm tra drift).
-8. Viết `.claude-plugin/marketplace.json` (tên `hvn-marketplace`) và `plugin.json` cho 7 plugin, không đặt trường `version` để commit SHA làm phiên bản. `name` trong `marketplace.json` trùng `name` trong `plugin.json`.
-9. Viết 3 skill thật cho `hvn-advisor`:
-   - `tu-van-giai-phap-hvn`: hỏi nhu cầu rồi gợi ý gói trong 22 giải pháp.
-   - `danh-muc-thuong-hieu-hvn`.
-   - `chon-goi-phu-hop`: so sánh tính năng, không có giá.
-10. Viết 3 skill thật cho `hvn-claude`, mỗi skill một loại: 1 playbook, 1 cấu hình, 1 tuân thủ. Mỗi skill đi qua cổng duyệt tạm: CEO hoặc người được chỉ định duyệt PR.
-11. CI (`.github/workflows/ci.yml`) chạy:
-    - `npm ci`, `npm run build`, rồi `git diff --exit-code` để bắt drift.
-    - `npm run check`.
-    - `npm test`.
-    - `claude plugin validate .` và `claude plugin validate plugins/<từng plugin>`.
-12. Thử cài thủ công:
-    - claude.ai: Add marketplace `hvngroup/hvn-ai-marketplace`, rồi cài `hvn-advisor` và `hvn-claude`.
-    - Claude Code: `/plugin marketplace add hvngroup/hvn-ai-marketplace`.
-    - Hỏi "Làm sao dùng Claude Projects cho phòng sales 5 người?" và xác nhận câu trả lời có khối gợi ý cùng link UTM.
+1. **Ngày 1–2, các spike xác minh** (ghi kết quả vào `plans/reports/spike-261021-platform-checks.md` của repo nội bộ):
+   - (a) Thêm marketplace thử nghiệm trên claude.ai với 4 loại tài khoản: Free, Pro, thành viên Team và Owner Team. Ghi lại ai thêm được, và khi repo đổi thì bản cài trên claude.ai có tự cập nhật hay không.
+   - (b) Chạy `claude plugin validate` trên runner GitHub mà không đăng nhập, với phiên bản CLI ghim.
+   - (c) Xác nhận HVN sở hữu tổ chức GitHub `hvngroup`. Đăng ký các tên dễ nhầm (`hvn-group`, `hvngroup-vn`). Bật verified domain `hvn.vn` và bắt buộc 2FA.
+2. Tạo 2 repo theo bảng trên.
+   - Staging: bật branch protection (bắt buộc PR, CI xanh, 1 approval của CODEOWNERS, chỉ squash-merge, bật merge queue, áp cho cả admin, tự hủy approval khi có commit mới).
+   - Công khai: chỉ deploy key của workflow mirror được push; tắt Issues và PR từ bên ngoài, trỏ hỗ trợ về `kythuat@hvn.vn`.
+3. Khởi tạo Node 24 LTS, TypeScript và vitest. Phụ thuộc: `yaml` (parse frontmatter bằng cách tự tách khối `---`; **không dùng gray-matter**, và từ chối mọi fence khác `---`), `zod`. Lockfile commit.
+4. Viết `catalog/products.yaml`: 14 thương hiệu, 22 giải pháp, từ vựng `needs`, các sản phẩm liên quan 7 plugin. **Marketing xác nhận mọi URL là trang thông tin đang tồn tại trước cuối tuần 1.** URL nào chưa có trang thì tạm trỏ về trang chủ thương hiệu.
+5. Viết `config/channels.yaml`, `config/link-allowlist.yaml` và `scripts/schema.ts`.
+6. Viết `scripts/build.ts` theo mục "Build sinh ra gì", cùng `shared/utm.ts` (hàm `withUtm`) và `shared/render-refs.ts` (thay `[[hvn:id]]` theo kênh). Phase 3 dùng lại hai module này.
+7. Viết `scripts/check.ts`. Mỗi luật có ít nhất 1 test âm tính, dùng fixture **tổng hợp** (không phải dữ liệu thật).
+8. CODEOWNERS:
+   - `*` thuộc nhóm kỹ thuật.
+   - `/content/**` thuộc nhóm duyệt nội dung.
+   - `/content/**/tuan-thu-*` hoặc item `type: tuan-thu` thuộc HVN Security. CODEOWNERS khớp theo đường dẫn, nên nội dung tuân thủ đặt trong skill có tiền tố `tuan-thu-`.
+   - `/.github/`, `/scripts/`, `/shared/`, `/server/`, `/config/`, `/catalog/`, `/snippets/`, `/Dockerfile`, `/deploy/` thuộc nhóm kỹ thuật kèm người phụ trách bảo mật.
+9. CI `ci.yml`:
+   - Trigger `pull_request` và `push` trên `main`.
+   - `permissions: contents: read`, không có secret.
+   - Action ghim theo SHA.
+   - Các bước: `npm ci` → `npm run build` → `git diff --exit-code plugins .claude-plugin` → `npm run check` → `npm test` → `npx @anthropic-ai/claude-code@<phiên bản ghim> plugin validate .` và cho từng `plugins/*`.
+   - Thêm một job hàng tuần chạy CLI bản mới nhất, chỉ cảnh báo, không chặn.
+10. `mirror.yml`: khi push lên `main` của staging, đẩy cây đã build sang `main` của repo công khai. Workflow dùng deploy key lưu trong GitHub Environment `public-mirror`, chỉ cho nhánh `main` dùng.
+11. Viết nguồn 3 skill cho `hvn-advisor`:
+    - `tu-van-giai-phap-hvn`: cách hỏi nhu cầu và chọn giải pháp.
+    - `danh-muc-giai-phap-hvn`: sinh từ catalog.
+    - `chon-goi-phu-hop`: tiêu chí chọn gói theo quy mô, không có giá.
+12. Viết nguồn 3 skill cho `hvn-claude`, khoảng 6 item, đủ 4 loại.
+13. Viết `evals/hvn-advisor.yaml` và `evals/hvn-claude.yaml`, mỗi file 30 câu hỏi tiếng Việt thực tế kèm skill kỳ vọng. Chạy với **cả 7 plugin** đã cài (5 plugin còn lại là khung rỗng), ghi 2 chỉ số: tỷ lệ chọn đúng skill và tỷ lệ có khối gợi ý trong các câu trả lời đã chọn đúng skill. Cách chạy:
+    - Nếu spike (b) cho phép, dùng `claude -p` headless.
+    - Nếu không, dùng bảng chạy tay trên claude.ai, ghi kết quả vào `evals/results/<ngày>.csv`.
+14. Thử cài: claude.ai (các loại tài khoản đạt ở spike (a)) và Claude Code (`/plugin marketplace add hvngroup/hvn-ai-marketplace`), cài `hvn-advisor` và `hvn-claude`.
 
 ## Verification
 
-- `npm run build && git diff --exit-code` trả về exit 0, tức không có drift.
-- `npm run check` trả về exit 0, `npm test` trả về exit 0.
-- `claude plugin validate .` trả về exit 0, và `claude plugin validate plugins/hvn-advisor` trả về exit 0.
-- `claude plugin validate plugins/hvn-claude` trả về exit 0 nhưng có cảnh báo về tên chứa "claude". Đây là cảnh báo đã được chấp nhận, CI không bật `--strict` cho plugin này.
-- Ảnh chụp màn hình thử trên claude.ai được lưu trong PR: khối gợi ý xuất hiện, link chứa `utm_source=claude&utm_medium=ai-plugin`.
+- `npm run build && git diff --exit-code plugins .claude-plugin` trả về exit 0.
+- `npm run check` trả về exit 0, và `npm test` trả về exit 0 với các test âm tính:
+  - PII (email, domain, IP, mã dịch vụ);
+  - link HVN viết tay;
+  - domain ngoài allowlist;
+  - `curl | sh`;
+  - file `hooks/` trong plugin;
+  - `needs` không có trong catalog;
+  - frontmatter `---js`;
+  - `utm_*` sai pattern.
+- `claude plugin validate` đạt exit 0 cho marketplace và từng plugin. `hvn-claude` chỉ có cảnh báo về tên, đã chấp nhận.
+- Eval của `hvn-advisor` và `hvn-claude`: **chọn đúng skill ≥80%**, **có khối gợi ý ≥90%** trong các câu đã chọn đúng skill. Chưa đạt thì sửa `description` hoặc vị trí dòng hướng dẫn rồi chạy lại; không hạ ngưỡng.
+- Repo công khai sau khi mirror chỉ chứa commit của `main` staging. Kiểm tra bằng `git log` của repo công khai: không có commit nào không có trong `main` staging.
+- File spike tồn tại, có kết quả cho các mục (a), (b), (c).
 
 ## Success Criteria
 
-- [ ] Repo công khai có marketplace hợp lệ, cài được trên claude.ai và Claude Code.
-- [ ] `hvn-advisor` và `hvn-claude` có 3 skill đã duyệt mỗi plugin.
-- [ ] CI chặn được link thiếu UTM, PII và drift của file sinh tự động. Mỗi lỗi có một test âm tính.
+- [ ] Marketplace công khai cài được trên các loại tài khoản đạt ở spike, và trên Claude Code.
+- [ ] Hợp đồng dữ liệu có nguồn duy nhất, mọi khóa ngoại và UTM đều được CI kiểm tra.
+- [ ] Eval 2 plugin đạt ngưỡng.
+- [ ] Không có đường nào đưa nội dung chưa duyệt lên repo công khai.
 
 ## Risks
 
-- **Tên plugin chứa thương hiệu bên thứ ba:** `hvn-claude`, `hvn-chatgpt` và các plugin tương tự bị validator cảnh báo và bị giữ lại để duyệt thương hiệu nếu nộp lên directory. Kênh chính là marketplace HVN tự host, nên không bị chặn.
-- **Trang đích chưa tồn tại:** `catalog.yaml` trỏ tới URL không có thật. Biện pháp: `check.ts --links` gọi HTTP HEAD mọi URL catalog, chạy hàng tuần trong CI.
+- **Tên plugin chứa thương hiệu bên thứ ba** (`hvn-claude`, `hvn-chatgpt`…) bị validator cảnh báo và bị giữ để duyệt thương hiệu nếu nộp directory. Kênh phát hành là marketplace tự host, nên không bị chặn.
+- **Model cập nhật làm giảm tỷ lệ hiện khối gợi ý.** Chạy lại eval ở Phase 7 và sau mỗi lần Anthropic ra model mới.

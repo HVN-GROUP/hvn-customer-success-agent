@@ -3,68 +3,97 @@ phase: 4
 title: "ChatGPT Plugin (trước đây gọi là App)"
 status: todo
 priority: P1
-effort: "3d công + thời gian chờ duyệt (tuần 3–6)"
+effort: "4d công + thời gian chờ duyệt (tuần 1–8)"
 dependencies: [3]
 ---
 
 # Phase 4: ChatGPT Plugin
 
+<!-- Updated: Red Team 2026-10-21 - mốc quyết định tuần 2; ca thử chỉ từ nội dung chắc chắn có; trang pháp lý từ tuần 1, HVN Security cùng duyệt; chính sách quyền riêng tư đúng thực tế; workspace ChatGPT Business -->
+
 ## Goal
 
-Đưa plugin HVN lên ChatGPT trên nền MCP server của Phase 3 (endpoint `/mcp/chatgpt`), chỉ trả văn bản, không đăng nhập. Nộp duyệt đúng hạn để có kết quả trong cửa sổ 8 tuần.
+Đưa plugin HVN lên ChatGPT trên `/mcp/chatgpt`, chỉ trả văn bản, không đăng nhập. Nộp hồ sơ trước cuối tuần 4, kèm mốc quyết định đi tiếp hay dừng rõ ràng.
 
 ## Sự thật đã kiểm chứng
 
 Nguồn: `plans/reports/researcher-261021-1130-chatgpt-apps-mcp-whmcs.md` §1–4.
 
-- OpenAI đã đổi tên "Apps" thành **Plugins**. Tài liệu nằm ở `developers.openai.com/plugins/*`.
-- Plugin được phép không đăng nhập, không có giao diện UI, và phải có annotation tường minh cho mọi công cụ.
-- Bắt buộc: tổ chức đã xác minh trên OpenAI Platform, xác minh domain qua `/.well-known/openai-apps-challenge`, chính sách quyền riêng tư, đầu mối hỗ trợ, 5 ca thử thành công và 3 ca thử thất bại, video demo, icon, các URL website, hỗ trợ, quyền riêng tư và điều khoản.
-- **Ràng buộc chính sách cần tuân thủ:**
-  - Không phục vụ quảng cáo; không tồn tại chủ yếu như một kênh quảng cáo.
-  - Không hiển thị gói đăng ký, không khởi tạo đăng ký mới, không quảng bá nâng cấp.
-  - Chỉ link tới **trang thông tin**, không link tới trang thanh toán.
-  - Mô tả plugin không nhắc giá, gói đăng ký, dùng thử hay khuyến mãi.
-  - Có ghi nhận truy cập hoặc gắn UTM thì phải công bố trong chính sách quyền riêng tư.
-- **Custom GPT không phải phương án:** sẽ ngừng chạy ngày 2026-12-11. Nguồn là đoạn trích Help Center, chưa đọc được trang gốc.
+- OpenAI đã đổi tên "Apps" thành **Plugins**. Plugin được phép không đăng nhập, không có giao diện UI, và phải có annotation tường minh cho mọi công cụ.
+- Hồ sơ bắt buộc gồm:
+  - tổ chức đã xác minh;
+  - xác minh domain;
+  - chính sách quyền riêng tư nêu loại dữ liệu, mục đích, bên nhận, thời hạn lưu và quyền kiểm soát;
+  - đầu mối hỗ trợ;
+  - 5 ca thử thành công và 3 ca thử thất bại;
+  - video demo, icon;
+  - các URL website, hỗ trợ, quyền riêng tư, điều khoản.
+- **Ràng buộc chính sách:**
+  - Không quảng cáo; không tồn tại chủ yếu như một kênh quảng cáo.
+  - Không hiển thị gói đăng ký và không quảng bá nâng cấp.
+  - Chỉ link trang thông tin, không link trang thanh toán.
+  - Mô tả plugin không nhắc giá hay khuyến mãi.
+  - Việc theo dõi (UTM, log) phải được công bố.
+- Custom GPT sẽ ngừng chạy ngày 2026-12-11 (đoạn trích Help Center), nên không phải phương án.
 
-Thiết kế ở Phase 3 (mức `relevant`, không chèn khối gợi ý vào `fetch`, catalog chỉ có trang thông tin) đã được dựng để đáp ứng các ràng buộc trên.
+Thiết kế đã áp dụng để đáp ứng các ràng buộc trên:
+
+- Mức `relevant`.
+- `fetch` không có khối gợi ý và không có câu chỉ dẫn.
+- Catalog chỉ chứa trang thông tin.
+- `exclude_types` và `tools_disabled` cấu hình được theo kênh.
 
 ## Files to Create / Modify
 
-- Create (website hvn.vn, Marketing đăng sau khi duyệt):
-  - `hvn.vn/chinh-sach-quyen-rieng-tu-ai-plugin`: dữ liệu thu thập (không thu thập dữ liệu cá nhân; log kỹ thuật không chứa nội dung truy vấn), mục đích, bên nhận (không có), thời hạn lưu log (đề xuất 30 ngày), việc gắn UTM trên link sang website HVN, quyền của người dùng, liên hệ `kythuat@hvn.vn`.
-  - `hvn.vn/dieu-khoan-ai-plugin`: nội dung chỉ mang tính tham khảo, không thay thế tư vấn pháp lý, giới hạn trách nhiệm.
-  - Cả hai trang dùng chung cho marketplace Claude (`privacyPolicyUrl` trong `plugin.json`, nếu sau này nộp directory).
-- Create (repo công khai): `submission/chatgpt/` gồm:
-  - `test-cases.md`: 5 ca thành công, ví dụ "Trỏ MX Google Workspace cho tên miền .vn", "Chọn gói Microsoft 365 cho 20 nhân viên". 3 ca thất bại, ví dụ câu hỏi ngoài phạm vi, yêu cầu báo giá (trả lời rằng plugin không cung cấp giá và dẫn tới trang thông tin), yêu cầu thao tác vào tài khoản.
+- Create (website hvn.vn, đăng sau khi **CMO và HVN Security cùng duyệt**):
+  - `hvn.vn/chinh-sach-quyen-rieng-tu-ai-plugin`. Nội dung phải mô tả **đúng thực tế**:
+    - server không lưu nội dung truy vấn và không lưu IP, chỉ log kỹ thuật tối đa 30 ngày;
+    - link sang website HVN có UTM;
+    - website HVN dùng Google Analytics 4 (Google là bên nhận dữ liệu);
+    - khi khách đặt mua trên WHMCS, nguồn UTM được lưu kèm dịch vụ để HVN đo hiệu quả kênh;
+    - quyền của người dùng; liên hệ `kythuat@hvn.vn`.
+  - `hvn.vn/dieu-khoan-ai-plugin`: nội dung chỉ để tham khảo, không thay thế tư vấn pháp lý, giới hạn trách nhiệm.
+- Create (repo staging): `submission/chatgpt/` gồm:
+  - `test-cases.md`. **5 ca thành công chỉ lấy từ nội dung chắc chắn có trước tuần 3**: Phase 1 (`hvn-claude`, `hvn-advisor`) và đợt nội dung đầu tiên của Phase 5 (ưu tiên `hvn-google-workspace` và `hvn-microsoft-365`). **Không dùng ca so sánh gói.** 3 ca thất bại: câu hỏi ngoài phạm vi, yêu cầu báo giá (plugin trả lời rằng không cung cấp giá), yêu cầu thao tác vào tài khoản.
   - `listing.md`: mô tả, release notes.
-  - `icon.png`: logo HVN theo Brand Guideline, nền #EA4445 hoặc trắng.
+  - `icon.png`: logo HVN theo Brand Guideline.
 - Create: video demo 2–3 phút (Marketing #Minion), lưu ngoài repo.
 
 ## Tasks & Steps
 
-1. Tuần 1, chạy song song: xác định tài khoản tổ chức trên OpenAI Platform đứng tên **CÔNG TY CỔ PHẦN TẬP ĐOÀN HVN**, rồi bắt đầu xác minh tổ chức. Đây là đường găng vì thời gian xác minh không do HVN kiểm soát.
-2. Kiểm tra project OpenAI không bật EU data residency, vì tùy chọn này chặn plugin dùng MCP server.
-3. Thử nghiệm: ChatGPT > Plugins > "+" > Add custom MCP server > `https://mcp.hvn.vn/mcp/chatgpt` > No authentication > Create as a plugin. Chạy đủ 8 ca trong `test-cases.md` và ghi kết quả. Xác nhận gói ChatGPT nào dùng được (Business chắc chắn được; Plus và Pro chưa rõ, UNVERIFIED).
-4. Gửi CMO duyệt trang chính sách quyền riêng tư và trang điều khoản, rồi đăng.
-5. Đặt `OPENAI_DOMAIN_TOKEN` trên server và xác minh domain.
-6. Soạn `listing.md` và đối chiếu từng dòng với quy định: không có giá, không khuyến mãi, không có từ ngữ quảng cáo. Đặt `commerce: false` và xác nhận Việt Nam có trong danh sách quốc gia phát hành (UNVERIFIED).
-7. Nộp hồ sơ. Phản hồi reviewer trong vòng 2 ngày làm việc. Nếu bị từ chối vì `recommend_solutions`, chuyển sang phương án dự phòng: nộp chỉ với `search` và `fetch`, và tắt `recommend_solutions` cho kênh `chatgpt` bằng `config/upsell.yaml` (thêm `tools_disabled`), không cần sửa code công cụ.
+1. **Ngày 1 tuần 1:**
+   - Bắt đầu xác minh tổ chức trên OpenAI Platform dưới tên **CÔNG TY CỔ PHẦN TẬP ĐOÀN HVN**.
+   - Kiểm tra project OpenAI không bật EU data residency.
+   - Xác nhận HVN có workspace **ChatGPT Business** để thử nghiệm; nếu chưa có thì đăng ký.
+   - Người chịu trách nhiệm: CEO chỉ định.
+2. **Tuần 1:** soạn chính sách quyền riêng tư và điều khoản. Hạn cho CMO và HVN Security duyệt: **cuối tuần 2**.
+3. **Tuần 3:**
+   - Thử trên `staging-mcp.hvn.vn/mcp/chatgpt` qua ChatGPT > Plugins > "+" > Add custom MCP server > No authentication > Create as a plugin.
+   - Chạy 8 ca thử và ghi kết quả.
+   - Thử thêm trên tài khoản Plus và Pro để biết gói nào dùng được (UNVERIFIED), rồi ghi vào `docs/cai-dat.md`.
+4. Đặt `OPENAI_DOMAIN_TOKEN` trên production và xác minh domain.
+5. Soạn `listing.md`, đối chiếu từng dòng với quy định; đặt `commerce: false`; xác nhận Việt Nam có trong danh sách quốc gia phát hành (UNVERIFIED).
+6. **Mốc quyết định cuối tuần 2** (CEO): nếu tổ chức chưa xác minh xong hoặc trang pháp lý chưa được duyệt, ChatGPT rời khỏi Done means của đợt 1 và nộp ngay khi đủ điều kiện. Phase 7 vẫn ra mắt Claude đúng hạn.
+7. Nộp hồ sơ **trước cuối tuần 4** theo cấu hình kênh đã chốt ở Validation. Phản hồi reviewer trong 2 ngày làm việc.
+8. Nếu bị từ chối vì nội dung mang tính quảng cáo:
+   - Bậc 1: thêm `recommend_solutions` vào `tools_disabled`.
+   - Bậc 2: thêm `chon-goi` vào `exclude_types`.
+   - Mỗi bậc là một thay đổi cấu hình đi qua PR, CD và deploy. Lưu ý: nộp lại sẽ bắt đầu một vòng duyệt mới, thời gian không được công bố.
 
 ## Verification
 
-- Bản ghi chạy 8 ca thử trên ChatGPT, kèm ảnh chụp, đính trong issue theo dõi.
-- `curl -s https://mcp.hvn.vn/.well-known/openai-apps-challenge` trả đúng token đã đăng ký (so sánh trên dashboard, không in token ra log công khai).
-- Trạng thái nộp trên dashboard là "Submitted" trước hết tuần 4.
+- Bản ghi 8 ca thử trên ChatGPT, kèm ảnh chụp, đính trong issue theo dõi.
+- Trang chính sách quyền riêng tư khớp hành vi thực của server: đối chiếu với mục "Ranh giới bảo mật" của Phase 3 và luồng dữ liệu của Phase 6. HVN Security ký xác nhận.
+- `curl -s -o /dev/null -w '%{http_code}' https://mcp.hvn.vn/.well-known/openai-apps-challenge` trả 200. Token được so trên dashboard, không in ra log.
+- Trạng thái trên dashboard là "Submitted" trước cuối tuần 4, hoặc biên bản quyết định ở mốc tuần 2 ghi lý do lùi.
 
 ## Success Criteria
 
 - [ ] Plugin chạy được trên ChatGPT qua custom MCP server, đạt 8/8 ca thử.
-- [ ] Hồ sơ đã nộp trước hết tuần 4; được duyệt, hoặc đã có phương án dự phòng sẵn sàng.
-- [ ] Trang chính sách quyền riêng tư và trang điều khoản đã đăng, mô tả đúng hành vi thật của server.
+- [ ] Hồ sơ đã nộp trước cuối tuần 4, hoặc đã có quyết định lùi tại mốc tuần 2.
+- [ ] Chính sách quyền riêng tư đã đăng và đúng với thực tế.
 
 ## Risks
 
-- **Thời gian duyệt không được công bố.** Phase 7 không chờ được duyệt mới ra mắt; link ChatGPT được bổ sung sau.
-- **Bị từ chối vì nội dung mang tính quảng cáo.** Đã có phương án dự phòng ở bước 7. Mức "chủ động mạnh" chỉ áp dụng trên marketplace Claude do HVN tự host.
+- **Thời gian duyệt không được công bố.** Phase 7 không chờ được duyệt; khách ChatGPT chỉ nhận link sau khi plugin được duyệt.
+- **Bị từ chối.** Đã có phương án hai bậc ở bước 8. Mức "chủ động mạnh" chỉ áp dụng trên marketplace Claude do HVN tự host.
