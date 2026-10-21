@@ -53,7 +53,7 @@ Ví dụ với N=35: 6 plugin × 35 = **210 item** trong khoảng 4,5 tuần, t�
 - **hvn-gemini:** Gemini trong Gmail, Docs, Sheets và Meet; Gems; NotebookLM; bật hoặc tắt Gemini theo OU.
 - **hvn-google-workspace:** MX/SPF/DKIM/DMARC, chuyển dữ liệu email, Drive dùng chung, xác minh 2 lớp, khôi phục email và file.
 - **hvn-microsoft-365:** domain, Exchange Online, Teams, SharePoint/OneDrive, Intune cơ bản, chuyển từ Google sang.
-- **hvn-security:** SSL trên cPanel, Nginx và IIS; gia hạn SSL; Acronis; Kaspersky; Nghị định 13; Luật An ninh mạng; ứng phó ransomware.
+- **hvn-security:** SSL trên cPanel, Nginx và IIS; gia hạn SSL; Acronis; Kaspersky; Luật Bảo vệ dữ liệu cá nhân 2025 và Nghị định 356/2025/NĐ-CP (thay Nghị định 13/2023 từ 01/01/2026); Luật An ninh mạng; ứng phó ransomware.
 
 ## Tasks & Steps
 
