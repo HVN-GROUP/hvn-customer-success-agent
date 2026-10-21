@@ -216,3 +216,11 @@ Lệnh `--summary` in số item theo plugin và theo loại; đây là nguồn s
 
 - **Tên plugin chứa thương hiệu bên thứ ba** (`hvn-claude`, `hvn-chatgpt`…) bị validator cảnh báo và bị giữ để duyệt thương hiệu nếu nộp directory. Kênh phát hành là marketplace tự host, nên không bị chặn.
 - **Model cập nhật làm giảm tỷ lệ hiện khối gợi ý.** Chạy lại eval ở Phase 7 và sau mỗi lần Anthropic ra model mới.
+
+## Tiến độ
+
+- [x] **Spike (b)** đạt ngày 2026-10-21. Kết quả trong `plans/reports/spike-261021-platform-checks.md`.
+  - `claude plugin validate` 2.1.306 chạy được mà không cần đăng nhập.
+  - `plugin.json` do build sinh ra phải có thêm `author`, `license` và `homepage`.
+  - Mỗi plugin cần `README.md` từ 40 từ trở lên.
+- [ ] **Spike (a), (c) và các bước 2–14:** chờ CEO tạo 2 repo `hvngroup/hvn-ai-marketplace-staging` (riêng tư) và `hvngroup/hvn-ai-marketplace` (công khai).

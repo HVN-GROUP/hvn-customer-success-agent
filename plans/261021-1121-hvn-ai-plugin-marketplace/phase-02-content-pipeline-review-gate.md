@@ -92,3 +92,12 @@ Repo `hvn-ai-marketplace-staging` (riêng tư):
 
 - **Nội dung sự cố kém sát thực tế** khi không dùng ticket. Bù lại bằng cách để người duyệt Service (#Witch) bổ sung lỗi thường gặp từ kinh nghiệm và kiểm tra độ đúng.
 - **Người duyệt quá tải.** Xem định mức và mốc quyết định ở Phase 5.
+
+## Tiến độ
+
+- [x] Phần nằm trong repo nội bộ đã xong ngày 2026-10-21:
+  - `.claude/skills/hvn-content-draft/SKILL.md`
+  - `references/style-guide.md` (5 template)
+  - `references/source-policy.md`
+  - `docs/content-pipeline.md`
+- [ ] Phần nằm trong repo staging (PR template, runbook gỡ nội dung, `freshness.yml`) và lượt chạy thử: chờ repo staging và Phase 1.
