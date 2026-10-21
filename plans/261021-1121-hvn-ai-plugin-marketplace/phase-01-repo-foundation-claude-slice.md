@@ -66,7 +66,7 @@ solutions:
 ```yaml
 channels:
   claude:  { level: strong,   max_items: 3 }   # quyết định của CEO
-  chatgpt: { level: relevant, max_items: 1 }   # tránh vi phạm chính sách quảng cáo của OpenAI
+  chatgpt: { level: relevant, max_items: 1, tools_disabled: [] }   # tránh vi phạm chính sách quảng cáo của OpenAI; Phase 4 có thể tắt recommend_solutions
 ```
 
 - `strong` nghĩa là mọi câu trả lời dùng skill đều kết thúc bằng khối "Giải pháp liên quan từ HVN GROUP", tối đa `max_items` mục, mục đầu tiên khớp `needs` của skill.

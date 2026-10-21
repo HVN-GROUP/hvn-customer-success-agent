@@ -4,7 +4,7 @@ title: "Ra mắt & phân phối"
 status: todo
 priority: P1
 effort: "1.5w (tuần 6–8)"
-dependencies: [4, 5, 6]
+dependencies: [4, 5, 6]   # Phase 4 chỉ cần ở trạng thái đã nộp, không cần chờ duyệt
 ---
 
 # Phase 7: Ra mắt & phân phối
