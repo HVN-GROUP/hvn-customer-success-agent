@@ -93,3 +93,11 @@ Thiết kế đã áp dụng để đáp ứng các ràng buộc trên:
 
 - **Thời gian duyệt không được công bố.** Phase 7 không chờ được duyệt; khách ChatGPT chỉ nhận link sau khi plugin được duyệt.
 - **Bị từ chối.** Đã có phương án dự phòng ở bước 8. Mức "chủ động mạnh" chỉ áp dụng trên marketplace Claude do HVN tự host.
+
+## Tiến độ
+
+- [x] **Bản nháp trong repo staging:**
+  - `submission/chatgpt/test-cases.md`: 5 ca thành công lấy từ nội dung đã có, 3 ca thất bại, không có ca so sánh gói.
+  - `submission/chatgpt/listing.md`.
+  - `docs/phap-ly/` gồm chính sách quyền riêng tư và điều khoản, viết khớp hành vi thật của server.
+- [ ] **Việc phía con người:** xác minh tổ chức OpenAI; workspace ChatGPT Business; CMO và HVN Security duyệt trang pháp lý; video demo; chạy 8 ca thử; nộp hồ sơ.

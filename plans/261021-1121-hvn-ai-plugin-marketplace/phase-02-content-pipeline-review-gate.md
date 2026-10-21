@@ -95,9 +95,6 @@ Repo `hvn-ai-marketplace-staging` (riêng tư):
 
 ## Tiến độ
 
-- [x] Phần nằm trong repo nội bộ đã xong ngày 2026-10-21:
-  - `.claude/skills/hvn-content-draft/SKILL.md`
-  - `references/style-guide.md` (5 template)
-  - `references/source-policy.md`
-  - `docs/content-pipeline.md`
-- [ ] Phần nằm trong repo staging (PR template, runbook gỡ nội dung, `freshness.yml`) và lượt chạy thử: chờ repo staging và Phase 1.
+- [x] **Repo nội bộ:** skill `hvn-content-draft`, 5 template, chính sách nguồn và `docs/content-pipeline.md`.
+- [x] **Repo staging:** PR template, `docs/runbook-go-noi-dung.md`, `freshness.yml` (cập nhật một issue ghim duy nhất).
+- [ ] **Chạy thử trọn vòng PR → CI → duyệt → merge → mirror:** cần branch protection, deploy key và người duyệt có tên.

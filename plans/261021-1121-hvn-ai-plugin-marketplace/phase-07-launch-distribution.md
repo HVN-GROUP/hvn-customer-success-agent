@@ -77,3 +77,10 @@ Admin WHMCS tự xác định các mẫu email cần sửa theo nhóm sản ph�
 
 - **Khách Team/Enterprise không thêm được marketplace.** Có hướng dẫn riêng cho admin; khách lớn được Service (#Witch) hỗ trợ trực tiếp.
 - **Giả mạo marketplace.** Đã đăng ký các tên GitHub dễ nhầm (Phase 1), có hộp nhận biết, và tin nhắn không bao giờ chứa `owner/repo`.
+
+## Tiến độ
+
+- [x] **Bản nháp trong repo staging:**
+  - `docs/phan-phoi/cai-dat.md`: nguồn cho trang `hvn.vn/ai-plugin`, có hộp nhận biết HVN thật.
+  - `docs/phan-phoi/email-whmcs-va-zalo.md`: khối email theo nhóm sản phẩm, quy trình admin sửa tay, kịch bản Zalo dùng `utm_source=zalo`.
+- [ ] **Việc phía con người:** CMO duyệt; đăng trang; sửa mẫu email WHMCS (chụp lại bản cũ trước khi sửa); chụp baseline GA4; thử cài trên 4 loại tài khoản; gửi broadcast Zalo.

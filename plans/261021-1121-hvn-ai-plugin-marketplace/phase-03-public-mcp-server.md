@@ -99,3 +99,23 @@ Mô tả công cụ viết trung tính: không bảo model ưu tiên HVN, không
 
 - **Không rõ ChatGPT dùng phiên bản spec MCP nào** [UNVERIFIED]. `createMcpHandler` phục vụ được cả hai; xác nhận ở Phase 4.
 - **API của SDK v2 còn mới.** Nếu tên trường khác báo cáo, đọc type hoặc README của gói đã cài; không đoán.
+
+## Tiến độ
+
+Mã nằm trong repo staging. Cập nhật ngày 2026-10-21.
+
+- [x] **Server:**
+  - `server/*` dùng MCP SDK v2 (`@modelcontextprotocol/server` 2.3.1) với Hono.
+  - Công cụ: `search`, `fetch`, `recommend_solutions`, khai báo đủ 3 annotation.
+  - ChatGPT loại `chon-goi`; `tools_disabled` cấu hình được.
+  - Giới hạn: rate limit theo kênh, giới hạn đồng thời, body 64 KB, timeout 2 giây; từ chối JSON-RPC batch.
+  - Log không chứa IP hay truy vấn.
+- [x] **Triển khai:** `Dockerfile`, `deploy/` (compose, Caddy loại log có IP, `smoke.sh`, `rollback.sh`, `remote-deploy.sh`), `deploy.yml` (chỉ deploy `main`; staging chạy smoke test; production cần người duyệt), `docs/van-hanh-mcp.md`.
+- [x] **Kiểm thử:** 15/15 truy vấn golden đạt; test tích hợp qua MCP client thật đạt; server thật trả lời đúng qua HTTP; mô phỏng image chỉ với dependency production chạy `smoke.sh` đạt; load test cục bộ 50 phiên × 3 lời gọi đạt (p95 233 ms, không có lỗi).
+- [ ] **Hạ tầng:** HCS cấp VPS, DNS `mcp.hvn.vn` và `staging-mcp.hvn.vn`, quyền truy cập GHCR, cùng secrets và vars cho các environment.
+- [ ] **Trên staging:**
+  - Build image thật (môi trường phiên này không có Docker daemon).
+  - Load test.
+  - Diễn tập rollback.
+  - Cài uptime monitor.
+  - Kiểm tra log Caddy không có IP khi container `mcp` dừng.

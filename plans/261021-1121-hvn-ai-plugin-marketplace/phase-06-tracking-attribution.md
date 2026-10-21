@@ -70,3 +70,12 @@ GA4 trên website thương hiệu ghi nhận mỗi lượt click từ plugin, ph
 
 - **Website thương hiệu thiếu GA4 hoặc key event** thì click mất dấu. Ưu tiên các domain mà catalog đợt 1 trỏ tới.
 - **Không đo được doanh thu.** CEO ra quyết định về kênh dựa trên click, chuyển đổi trên website và lượt cài.
+
+## Tiến độ
+
+- [x] **Đã có:** `docs/do-luong-ga4.md` (quy ước UTM, báo cáo, công thức chỉ số), `github-traffic.yml`, kênh `zalo` trong `config/channels.yaml`.
+- [ ] **Việc còn lại:**
+  - Marketing xác nhận GA4 và key event trên 15 domain.
+  - Thêm sự kiện `copy_install_command`.
+  - Tạo secret `PUBLIC_REPO_TRAFFIC_TOKEN`.
+  - Dựng báo cáo GA4 Exploration.

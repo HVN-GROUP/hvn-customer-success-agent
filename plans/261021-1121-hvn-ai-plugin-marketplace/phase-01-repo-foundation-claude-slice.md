@@ -219,8 +219,21 @@ Lệnh `--summary` in số item theo plugin và theo loại; đây là nguồn s
 
 ## Tiến độ
 
-- [x] **Spike (b)** đạt ngày 2026-10-21. Kết quả trong `plans/reports/spike-261021-platform-checks.md`.
-  - `claude plugin validate` 2.1.306 chạy được mà không cần đăng nhập.
-  - `plugin.json` do build sinh ra phải có thêm `author`, `license` và `homepage`.
-  - Mỗi plugin cần `README.md` từ 40 từ trở lên.
-- [ ] **Spike (a), (c) và các bước 2–14:** chờ CEO tạo 2 repo `hvngroup/hvn-ai-marketplace-staging` (riêng tư) và `hvngroup/hvn-ai-marketplace` (công khai).
+Mã nằm trong repo `hvngroup/hvn-ai-marketplace-staging`, nhánh `claude/bold-dijkstra-wxejck`. Cập nhật ngày 2026-10-21.
+
+- [x] **Spike (b):** `claude plugin validate` 2.1.306 chạy được mà không cần đăng nhập. Chi tiết: `plans/reports/spike-261021-platform-checks.md`.
+- [x] **Mã và cấu hình:**
+  - Hợp đồng dữ liệu: `catalog/products.yaml` (22 needs, 15 brand gồm cả HVN GROUP, 19 sản phẩm, 22 giải pháp), `config/channels.yaml`, `config/link-allowlist.yaml`.
+  - Các module `shared/*` và `scripts/build.ts`.
+  - `scripts/check.ts`. Luật chặn gồm: schema, khóa ngoại, PII (email, tên miền, số điện thoại, IPv4/IPv6, mã WHMCS, token), link HVN viết tay, domain ngoài allowlist, lệnh tải và chạy script, whitelist file plugin, symlink, drift, UTM. Chuỗi được quét gồm cả mô tả skill, metadata plugin và catalog.
+- [x] **CI và quy trình:** `ci.yml` (có merge_group), `mirror.yml` (ghim host key GitHub), `validate-latest.yml`, CODEOWNERS, PR template, `LICENSE` (MIT) và `LICENSE-CONTENT.md`.
+- [x] **Nội dung mẫu:**
+  - `hvn-advisor`: 2 skill viết tay; skill danh mục sinh từ catalog gồm 22 giải pháp và bảng thương hiệu.
+  - `hvn-claude`: 4 skill với 7 item, đủ 5 loại, có lộ trình 90 ngày.
+- [x] **Bộ eval:** 30 câu cho mỗi plugin, kèm script `eval:sheet` và `eval:score`.
+- [x] **Kết quả kiểm tra:** 64 test đạt, `check` đạt, `typecheck` đạt, `claude plugin validate` đạt cho marketplace và 2 plugin (chỉ còn cảnh báo về version, icon và tên `hvn-claude`).
+- [ ] **Chạy eval thật trên claude.ai:** cần tài khoản thật; ngưỡng chọn đúng skill ≥80%, có khối gợi ý ≥90%.
+- [ ] **Spike (a):** thử Add marketplace với 4 loại tài khoản. Cần repo công khai đã được mirror.
+- [ ] **Spike (c):** quản trị GitHub xác nhận quyền sở hữu `hvngroup`, đăng ký tên dễ nhầm, verified domain, bắt buộc 2FA.
+- [ ] **Thiết lập repo theo `docs/thiet-lap-repo.md`:** team, branch protection, environments, deploy key.
+- [ ] **Marketing xác nhận URL trong catalog.** Hiện mọi sản phẩm đều trỏ về trang chủ thương hiệu.
