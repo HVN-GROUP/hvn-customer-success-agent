@@ -58,7 +58,7 @@ GA4 trên website thương hiệu ghi nhận mỗi lượt click từ plugin, ph
 - GA4 Realtime ghi nhận phiên `utm_medium=ai-plugin` từ một lượt click thật trong plugin Claude, và một lượt từ ChatGPT ở staging.
 - Báo cáo GA4 Exploration hiển thị đủ 3 chiều source, campaign và content.
 - `github-traffic.yml` chạy tay (`workflow_dispatch`) và tạo được artifact CSV.
-- Repo staging không có file hook WHMCS, script WHMCS hay cấu hình giỏ hàng: `grep -rn "whmcs\|cart.php" snippets server scripts` không trả kết quả ngoài luật chặn link trang thanh toán của `check.ts`.
+- Repo staging không có file hook WHMCS, script WHMCS hay cấu hình giỏ hàng: `grep -rn "whmcs\|cart.php" server scripts` không trả kết quả ngoài luật chặn link trang thanh toán của `check.ts`.
 
 ## Success Criteria
 
