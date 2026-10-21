@@ -9,6 +9,7 @@ dependencies: [2]
 
 # Phase 5: Sản xuất nội dung cho 7 plugin
 
+<!-- Updated: Validation Session 2 - thêm loại Lộ trình onboard, 1 item mỗi plugin, nằm trong N=35 -->
 <!-- Updated: Red Team 2026-10-21 - đơn vị là item; advisor sinh từ catalog; tính lại năng lực duyệt; người duyệt có tên; mốc tuần 4 bằng số tuyệt đối; eval cho 5 plugin còn lại; ưu tiên nội dung phục vụ ca thử ChatGPT -->
 
 ## Goal
@@ -25,10 +26,13 @@ Mỗi plugin chuyên sâu đạt tối thiểu **N item đã duyệt** (giá tr�
 
 | Loại | Tỷ lệ | Với N=35 |
 |---|---|---|
-| Playbook | ~30% | 10 |
-| Cấu hình & sự cố | ~40% | 15 |
+| Lộ trình onboard | 1 item cố định | 1 |
+| Playbook | ~25% | 9 |
+| Cấu hình & sự cố | ~43% | 15 |
 | Chọn gói | ~15% | 5 |
 | Tuân thủ | ~15% | 5 |
+
+**Lộ trình onboard** (`lo-trinh`) là item đầu tiên mỗi plugin chuyên sâu phải có. Item này đi theo các mốc Ngày 1, Tuần 1, Tháng 1 và Tháng 3, và mỗi bước dẫn tới item playbook hoặc cấu hình có sẵn trong plugin. Ví dụ "Lộ trình 90 ngày dùng Google Workspace hiệu quả". Item `lo-trinh` được viết **sau cùng** trong mỗi plugin, khi các item mà nó dẫn tới đã được merge. `check.ts` kiểm tra mọi liên kết nội bộ trong `lo-trinh` đều trỏ tới item có thật.
 
 Ví dụ với N=35: 6 plugin × 35 = **210 item** trong khoảng 4,5 tuần, tức khoảng 47 item mỗi tuần. 6 item đã có từ Phase 1 không đổi đáng kể con số này. Năng lực cần có:
 

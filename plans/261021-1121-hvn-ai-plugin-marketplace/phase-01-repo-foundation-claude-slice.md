@@ -9,6 +9,7 @@ dependencies: []
 
 # Phase 1: Nền móng repo + lát cắt dọc trên Claude
 
+<!-- Updated: Validation Session 2 - thêm loại nội dung lo-trinh; không tích hợp WHMCS -->
 <!-- Updated: Red Team 2026-10-21 - repo staging riêng tư + mirror công khai; nguồn tách khỏi plugin sinh tự động; đơn vị nội dung; UTM/needs một nguồn; whitelist link và loại file; CI an toàn; eval -->
 
 ## Goal
@@ -106,7 +107,7 @@ description: "Khắc phục sự cố email Google Workspace: không nhận đư
 ```yaml
 ---
 title: "Khôi phục email bị xóa trong Google Workspace"
-type: cau-hinh                            # playbook | cau-hinh | chon-goi | tuan-thu
+type: cau-hinh                            # playbook | cau-hinh | chon-goi | tuan-thu | lo-trinh
 needs: [sao-luu-du-lieu]                  # phải thuộc catalog.needs
 reviewed: 2026-11-03                      # ngày đầy đủ
 review_sla_days: 90                       # theo loại: AI playbook 60; khác 120
@@ -123,7 +124,7 @@ sources: [https://support.google.com/a/answer/...]   # domain phải thuộc lin
 
 1. **Cho Claude** (`plugins/**`):
    - Mỗi `<item>.md` được copy sang `references/`. Cuối file build nối thêm khối "Giải pháp liên quan từ HVN GROUP": tối đa 3 mục, chọn theo `needs` của item, link có `utm_source=claude&utm_medium=ai-plugin&utm_campaign=<plugin>&utm_content=<plugin.skill.item>`, mỗi mục ghi "(Sản phẩm của HVN GROUP)".
-   - SKILL.md được sinh gồm: frontmatter, **ngay dưới tiêu đề** một dòng mô tả "Mỗi tài liệu tham chiếu kết thúc bằng khối Giải pháp liên quan; hiển thị khối đó nguyên văn ở cuối câu trả lời", phần mở đầu nguồn, và mục lục các item (tiêu đề cùng đường dẫn).
+   - SKILL.md được sinh gồm: frontmatter, **ngay dưới tiêu đề** một dòng mô tả "Mỗi tài liệu tham chiếu kết thúc bằng khối Giải pháp liên quan; hiển thị khối đó nguyên văn ở cuối câu trả lời", phần mở đầu nguồn, và mục lục các item (tiêu đề cùng đường dẫn). Item loại `lo-trinh` luôn đứng đầu mục lục, để người dùng mới được dẫn vào lộ trình onboard trước.
    - `hvn-advisor` có skill `danh-muc-giai-phap-hvn`, sinh **toàn bộ** từ catalog: 14 thương hiệu và 22 giải pháp, mỗi giải pháp một reference. Nội dung viết tay của advisor chỉ là cách tư vấn.
    - `marketplace.json` và `plugin.json` được sinh từ `plugin.yaml`.
 2. **Cho MCP** (`dist/content-index.json`): mỗi item một bản ghi `{id, plugin, skill, title, type, needs, reviewed, url, text}`.
@@ -134,7 +135,7 @@ sources: [https://support.google.com/a/answer/...]   # domain phải thuộc lin
 
 Các luật **luôn chặn**, dùng cho cả hotfix:
 
-- (a) Schema zod của mọi file nguồn; mọi khóa ngoại (`brand`, `needs`) tồn tại; `name` trùng tên thư mục; độ dài trường đúng giới hạn.
+- (a) Schema zod của mọi file nguồn; mọi khóa ngoại (`brand`, `needs`) tồn tại; `name` trùng tên thư mục; độ dài trường đúng giới hạn; mỗi liên kết nội bộ trong item `lo-trinh` trỏ tới item có thật trong cùng plugin.
 - (b) Không có link HVN trong nguồn; mọi link ngoài thuộc allowlist; URL trong catalog không chứa `cart.php`, `/checkout`, `/cart`, `a=add`.
 - (c) Quét PII:
   - email ngoài `@hvn.vn` và ngoài `example.*`;
@@ -169,7 +170,7 @@ Lệnh `--summary` in số item theo plugin và theo loại; đây là nguồn s
    - `*` thuộc nhóm kỹ thuật.
    - `/content/**` thuộc nhóm duyệt nội dung: 1 biên tập viên Content (#Valkyrie) và 1 kỹ thuật viên Service (#Witch), tên cụ thể ghi ở Validation Log.
    - `/content/**/tuan-thu-*` hoặc item `type: tuan-thu` thuộc HVN Security. CODEOWNERS khớp theo đường dẫn, nên nội dung tuân thủ đặt trong skill có tiền tố `tuan-thu-`.
-   - `/.github/`, `/scripts/`, `/shared/`, `/server/`, `/config/`, `/catalog/`, `/snippets/`, `/Dockerfile`, `/deploy/` thuộc nhóm kỹ thuật kèm người phụ trách bảo mật.
+   - `/.github/`, `/scripts/`, `/shared/`, `/server/`, `/config/`, `/catalog/`, `/Dockerfile`, `/deploy/` thuộc nhóm kỹ thuật kèm người phụ trách bảo mật.
 9. CI `ci.yml`:
    - Trigger `pull_request` và `push` trên `main`.
    - `permissions: contents: read`, không có secret.

@@ -9,11 +9,12 @@ dependencies: [4, 5, 6]   # Phase 4 chỉ cần đã nộp hoặc đã có quy�
 
 # Phase 7: Ra mắt & phân phối
 
+<!-- Updated: Validation Session 2 - WHMCS chỉ dùng để admin sửa tay mẫu email; email dẫn tới lộ trình onboard; baseline chỉ từ GA4 -->
 <!-- Updated: Red Team 2026-10-21 - ánh xạ theo kênh; mọi tin nhắn chỉ dẫn về hvn.vn/ai-plugin; hướng dẫn bật tự cập nhật và cách nhận biết HVN thật; thử cài trên nhiều loại tài khoản; sao lưu mẫu email; baseline lưu ngoài git -->
 
 ## Goal
 
-Đưa link cài plugin tới đúng khách hiện hữu theo kênh AI họ dùng, qua email WHMCS và Zalo OA. Mọi tin nhắn chỉ trỏ về `hvn.vn/ai-plugin`. Ra mắt marketplace Claude đúng hạn, và bổ sung ChatGPT khi plugin được duyệt. Có baseline để đo ở mốc 90 ngày.
+Đưa **lộ trình onboard** và link cài plugin tới đúng khách hiện hữu theo dịch vụ họ dùng, qua email WHMCS (admin sửa tay mẫu email, không có tích hợp dữ liệu) và Zalo OA. Mọi tin nhắn chỉ trỏ về `hvn.vn/ai-plugin`. Ra mắt marketplace Claude đúng hạn, và bổ sung ChatGPT khi plugin được duyệt. Có baseline để đo ở mốc 90 ngày.
 
 ## Ánh xạ sản phẩm đã mua sang nội dung giới thiệu
 
@@ -25,7 +26,7 @@ dependencies: [4, 5, 6]   # Phase 4 chỉ cần đã nộp hoặc đã có quy�
 | Microsoft 365 (MSO.VN) | Marketplace Claude (hvn-microsoft-365 + hvn-advisor), kèm plugin ChatGPT nếu đã được duyệt |
 | SSL (CER.VN), Acronis, Kaspersky, dịch vụ HVN Security | Marketplace Claude (hvn-security + hvn-advisor), kèm plugin ChatGPT nếu đã được duyệt |
 
-Tên nhóm sản phẩm thật được lấy bằng `product_groups_list` và `products_list` của WHMCS lúc triển khai, không đoán trước.
+Admin WHMCS tự xác định các mẫu email cần sửa theo nhóm sản phẩm ngay trong giao diện quản trị. Plan và mọi công cụ của dự án không đọc dữ liệu WHMCS.
 
 ## Files to Create / Modify
 
@@ -38,17 +39,14 @@ Tên nhóm sản phẩm thật được lấy bằng `product_groups_list` và `
 - Create: trang `hvn.vn/ai-plugin` do Marketing đăng sau khi **CMO duyệt**. Có nút "Sao chép lệnh cài" gắn sự kiện GA4, dùng làm chỉ số lượt cài đại diện (Phase 6).
 - Modify (WHMCS admin):
   - **Trước khi sửa**, chụp lại nội dung từng mẫu email sẽ sửa.
-  - Thêm khối "Dùng [sản phẩm] hiệu quả hơn với trợ lý AI của HVN" vào email chào mừng và email nhắc gia hạn của các nhóm trong bảng.
+  - Thêm khối "Lộ trình 90 ngày dùng [sản phẩm] hiệu quả với trợ lý AI của HVN" vào email chào mừng và email nhắc gia hạn của các nhóm trong bảng. Khối này tóm tắt 4 mốc của item `lo-trinh` tương ứng và dẫn tới trang cài đặt.
   - Link **chỉ** trỏ tới `hvn.vn/ai-plugin` với `utm_source=email&utm_medium=whmcs&utm_campaign=ai-plugin-onboarding` (thuộc enum trong `config/channels.yaml`).
   - Không bao giờ đặt chuỗi `owner/repo` trong email hay Zalo.
 - Create: kịch bản broadcast Zalo OA theo từng tập khách, **CMO duyệt**, chỉ chứa link `hvn.vn/ai-plugin`.
 
 ## Tasks & Steps
 
-1. **Baseline trước ra mắt**, lưu trên Drive hoặc Outline có phân quyền (CEO, CFO, COO), **không lưu trong git**, đánh dấu "BẢO MẬT":
-   - Danh sách từ khóa và chủ đề ticket **cố định** cho các chủ đề plugin phủ.
-   - Số ticket 30 ngày gần nhất theo danh sách đó.
-   - Số dịch vụ và doanh thu 30 ngày gần nhất của các domain đích.
+1. **Baseline trước ra mắt** (chỉ dùng GA4, lưu trên Drive hoặc Outline có phân quyền, không lưu trong git): số phiên và key event trong 30 ngày gần nhất trên các domain đích của catalog. Số liệu này dùng để so sánh với phần tăng thêm do plugin mang lại.
 2. Kiểm tra trước ra mắt:
    - `npm run check -- --freshness`.
    - `claude plugin validate` cho marketplace và từng plugin.
@@ -67,13 +65,13 @@ Tên nhóm sản phẩm thật được lấy bằng `product_groups_list` và `
 - Eval 7 plugin đạt ngưỡng tại ngày release.
 - Mỗi mẫu email đã sửa có một lần gửi thử đạt; GA4 Realtime ghi nhận `utm_campaign=ai-plugin-onboarding`.
 - `grep -R "hvngroup/" ` trên kịch bản Zalo và nội dung email không có kết quả; chuỗi `owner/repo` chỉ xuất hiện trên trang `hvn.vn/ai-plugin`.
-- Baseline tồn tại trên Drive hoặc Outline, có ngày tạo trước ngày ra mắt.
+- Baseline GA4 tồn tại trên Drive hoặc Outline, có ngày tạo trước ngày ra mắt.
 
 ## Success Criteria
 
 - [ ] Marketplace Claude ra mắt; trang `hvn.vn/ai-plugin` có hướng dẫn cho từng loại tài khoản và hộp nhận biết.
 - [ ] Email chào mừng và email gia hạn của các nhóm sản phẩm có link tới trang cài đặt; phần ChatGPT chỉ bật sau khi được duyệt.
-- [ ] Đã có baseline và danh sách từ khóa cố định.
+- [ ] Đã có baseline GA4.
 
 ## Risks
 

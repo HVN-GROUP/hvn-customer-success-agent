@@ -50,7 +50,6 @@ Thiết kế đã áp dụng để đáp ứng các ràng buộc trên:
     - server không lưu nội dung truy vấn và không lưu IP, chỉ log kỹ thuật tối đa 30 ngày;
     - link sang website HVN có UTM;
     - website HVN dùng Google Analytics 4 (Google là bên nhận dữ liệu);
-    - khi khách đặt mua trên WHMCS, nguồn UTM được lưu kèm dịch vụ để HVN đo hiệu quả kênh;
     - quyền của người dùng; liên hệ `kythuat@hvn.vn`.
   - `hvn.vn/dieu-khoan-ai-plugin`: nội dung chỉ để tham khảo, không thay thế tư vấn pháp lý, giới hạn trách nhiệm.
 - Create (repo staging): `submission/chatgpt/` gồm:
