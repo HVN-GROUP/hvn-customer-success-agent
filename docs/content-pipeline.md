@@ -6,9 +6,9 @@ Tài liệu dành cho biên tập viên và người duyệt nội dung của HV
 
 | Repo | Quyền | Dùng để |
 |---|---|---|
-| `hvngroup/hvn-customer-success-agent` | Riêng tư | Plan và skill soạn nội dung `hvn-content-draft` |
-| `hvngroup/hvn-ai-marketplace-staging` | Riêng tư | Soạn nội dung, mở PR, chạy CI, duyệt. **Mọi PR mở ở đây.** |
-| `hvngroup/hvn-ai-marketplace` | Công khai | Bản sao tự động của `main` staging. Không ai push tay hay mở PR vào repo này. |
+| `HVN-GROUP/hvn-customer-success-agent` | Riêng tư | Plan và skill soạn nội dung `hvn-content-draft` |
+| `HVN-GROUP/hvn-ai-marketplace-staging` | Riêng tư | Soạn nội dung, mở PR, chạy CI, duyệt. **Mọi PR mở ở đây.** |
+| `HVN-GROUP/hvn-ai-marketplace` | Công khai | Bản sao tự động của `main` staging. Không ai push tay hay mở PR vào repo này. |
 
 ## Biên tập viên
 
