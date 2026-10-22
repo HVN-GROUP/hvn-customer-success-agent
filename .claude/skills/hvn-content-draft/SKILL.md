@@ -1,6 +1,6 @@
 ---
 name: hvn-content-draft
-description: "Soạn nháp một nội dung (item) cho marketplace plugin AI của HVN GROUP, rồi mở PR vào repo staging riêng tư hvngroup/hvn-ai-marketplace-staging. Dùng khi biên tập viên yêu cầu viết playbook, hướng dẫn cấu hình/sự cố, tư vấn chọn gói, nội dung tuân thủ hoặc lộ trình onboard cho một plugin như hvn-claude, hvn-google-workspace, hvn-security."
+description: "Soạn nháp một nội dung (item) cho marketplace plugin AI của HVN GROUP, rồi mở PR vào repo staging riêng tư HVN-GROUP/hvn-ai-marketplace-staging. Dùng khi biên tập viên yêu cầu viết playbook, hướng dẫn cấu hình/sự cố, tư vấn chọn gói, nội dung tuân thủ hoặc lộ trình onboard cho một plugin như hvn-claude, hvn-google-workspace, hvn-security."
 ---
 
 # Soạn nội dung cho HVN AI Plugin Marketplace
