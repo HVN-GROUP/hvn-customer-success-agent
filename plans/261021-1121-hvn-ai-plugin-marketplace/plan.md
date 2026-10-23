@@ -33,9 +33,9 @@ Gemini, Grok, Cursor và Antigravity dùng lại cùng lõi ở các đợt sau.
 1. **Không đăng nhập, không hiển thị giá, không kết nối WHMCS.** Nội dung công khai. Không dùng ticket hay dữ liệu khách hàng làm nguồn. Không có hook hay báo cáo WHMCS. Admin chỉ sửa tay mẫu email trong WHMCS.
 2. **Đo bằng link UTM và GA4** trên website thương hiệu. Không đo doanh thu trong WHMCS. Không thu lead trong chat.
 3. **Mức up-sell theo kênh.** Cả hai kênh dùng chung code, chỉ khác cấu hình:
-   - Claude: "chủ động mạnh". Mọi tài liệu kết thúc bằng khối gợi ý, tối đa 3 mục.
+   - Claude: "chủ động mạnh". Mọi tài liệu kết thúc bằng khối gợi ý, tối đa 3 mục. *(Session 3: câu trả lời chỉ giới thiệu mục phù hợp nhất trong 1–2 câu tự nhiên, không chép nguyên khối.)*
    - ChatGPT: "chỉ khi liên quan", để tuân thủ chính sách của OpenAI.
-4. **1 plugin cốt lõi + 6 plugin chuyên sâu.** Mỗi AI một plugin riêng.
+4. ~~**1 plugin cốt lõi + 6 plugin chuyên sâu.** Mỗi AI một plugin riêng.~~ Thay bằng **một plugin `tech-advisor` tên trung lập, 7 chủ đề** (Validation Session 3, 23/10/2026).
 5. **Nội dung do AI sinh, người duyệt.** Tiếng Việt trước. Mỗi plugin chuyên sâu có 1 **lộ trình onboard** (Ngày 1, Tuần 1, Tháng 1, Tháng 3).
 6. **Thứ tự nền tảng:** Claude và ChatGPT ở đợt 1; Gemini và Grok ở đợt 2; Cursor và Antigravity ở đợt 3.
 7. **Nhân lực:** dev nội bộ (#Giant) dùng Claude Code, 6–8 tuần.
@@ -253,3 +253,18 @@ Ngoài repo:
   - tên file báo cáo nghiên cứu;
   - các dòng lịch sử trong Red Team Review.
 - Không còn mâu thuẫn chưa xử lý.
+
+### Session 3 — 2026-10-23
+
+**Người quyết định:** CEO, sau khi dùng thử plugin trên claude.ai.
+
+| # | Câu hỏi | Quyết định | Lan tới |
+|---|---|---|---|
+| 1 | Giọng văn khi gợi ý giải pháp | **Tư vấn như chuyên gia độc lập, nhắc HVN GROUP ở ngôi thứ ba.** Không dùng mã giải pháp (S01…S22), không lời lẽ quảng cáo. Cuối câu trả lời chỉ giới thiệu mục phù hợp nhất trong 1–2 câu tự nhiên, thay cho việc chép nguyên khối gợi ý. | P1 (build, check), P2 (style guide), P5 (eval: `has_block` = có câu giới thiệu) |
+| 2 | Số plugin trên Claude | **Một plugin `tech-advisor` (tên hiển thị "Tech Advisor"), không có chữ HVN trong tên.** 7 plugin cũ thành 7 chủ đề. Mã tài liệu và `utm_campaign` vẫn theo chủ đề. | P1, P5, P7 (trang cài đặt, email) |
+| 3 | Mở rộng sang đối tác | **Đối tác mới chỉ thêm dòng vào catalog.** Chỉ thêm chủ đề khi cần hướng dẫn chuyên sâu. Không tạo plugin mới. | P5 |
+
+**Tác động:**
+- N = 35 giờ tính cho mỗi chủ đề chuyên sâu (tổng 210 không đổi). `npm run check -- --summary` đếm theo chủ đề.
+- Eval chạy với một plugin `tech-advisor` đã cài. Ngưỡng giữ nguyên.
+- Khi tổng số skill vượt khoảng 60–80 hoặc eval chọn đúng skill dưới 80%, cân nhắc chuyển plugin Claude sang dùng MCP server chung với ChatGPT.
