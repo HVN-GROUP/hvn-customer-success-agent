@@ -205,7 +205,7 @@ Ngoài repo:
 | 2 | 2 người duyệt nội dung | **1 biên tập viên Content (#Valkyrie) + 1 kỹ thuật viên Service (#Witch).** Tên cụ thể và số giờ mỗi tuần do COO/CMO chỉ định trong tuần 1, rồi ghi bổ sung vào đây. | P1 (CODEOWNERS), P5 |
 | 3 | Giấy phép nội dung | **MIT cho mã. Nội dung © HVN GROUP:** được cài, dùng và mirror nội bộ, kể cả doanh nghiệp khách hàng; cấm tái phân phối công khai hay bán lại. | P1 |
 | 4 | Cấu hình nộp ChatGPT | **Giữ `recommend_solutions`, loại `chon-goi` (`exclude_types: [chon-goi]`).** Dự phòng: tắt `recommend_solutions`. | P1 (channels.yaml), P3, P4 |
-| 5 | Anthropic directory | **Không nộp ở đợt 1.** Xem xét lại sau 90 ngày. | Out of scope |
+| 5 | Anthropic directory | ~~**Không nộp ở đợt 1.** Xem xét lại sau 90 ngày.~~ Thay bằng: **chuẩn bị nộp ngay** (Validation Session 4, 23/10/2026). | Out of scope → P7 |
 | 6 | Quyền truy cập repo `hvn-customer-success-agent` | **Riêng tư.** Plan, báo cáo và skill soạn nội dung được phép nằm ở đây. | P2 |
 
 **Tác động:**
@@ -268,3 +268,12 @@ Ngoài repo:
 - N = 35 giờ tính cho mỗi chủ đề chuyên sâu (tổng 210 không đổi). `npm run check -- --summary` đếm theo chủ đề.
 - Eval chạy với một plugin `tech-advisor` đã cài. Ngưỡng giữ nguyên.
 - Khi tổng số skill vượt khoảng 60–80 hoặc eval chọn đúng skill dưới 80%, cân nhắc chuyển plugin Claude sang dùng MCP server chung với ChatGPT.
+
+### Session 4 — 2026-10-23
+
+**Người quyết định:** CEO.
+
+| # | Câu hỏi | Quyết định | Lan tới |
+|---|---|---|---|
+| 1 | Khách Team và Enterprise cài cho cả tổ chức, không sao chép repo, vẫn nhận cập nhật | Trang cài đặt hướng dẫn 4 cách: thư mục Anthropic (sau khi niêm yết); repo GitHub riêng tư của khách chỉ chứa một `marketplace.json` trỏ tới `plugins/tech-advisor` qua `git-subdir` (cần tài khoản GitHub miễn phí, bấm Re-sync khi có bản mới); từng thành viên tự thêm; managed settings cho Claude Code. | P7 (`docs/phan-phoi/cai-dat.md`) |
+| 2 | Anthropic directory | **Chuẩn bị nộp ngay**, đảo quyết định Session 1 #5. Hồ sơ: `submission/claude-directory/README.md` ở repo staging. Validate sớm để biết vấn đề về tên; chỉ Submit for review khi các chủ đề hướng dẫn có thêm bài, vì chính sách §4C không nhận phần mềm chủ yếu để quảng cáo. | P7 |
