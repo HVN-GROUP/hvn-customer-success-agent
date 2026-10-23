@@ -10,6 +10,20 @@
 - **Định dạng:** căn lề trái, tiêu đề ngắn, danh sách đánh số cho các bước.
 - **Độ dài:** mỗi item từ 150 đến 900 từ. Chủ đề dài thì tách thành nhiều item.
 
+## Vị thế khi nhắc HVN GROUP
+
+Nội dung plugin là lời khuyên của một chuyên gia tư vấn độc lập. HVN GROUP xuất hiện như một bên thứ ba: đơn vị cung cấp và hỗ trợ triển khai tại Việt Nam.
+
+- **Khách quan trước:** nêu vấn đề và hướng làm trước, công cụ sau. Khi so sánh, trình bày công bằng các phương án phổ biến, kể cả phương án HVN GROUP không phân phối. Nói rõ trường hợp doanh nghiệp chưa cần làm.
+- **Thiên về HVN GROUP một cách có lý do:** nếu phương án HVN GROUP cung cấp phù hợp hơn, viết rõ vì sao. Mỗi item nhắc HVN GROUP tối đa 1–2 lần, đặt ở chỗ người đọc cần người triển khai.
+- **Ngôi thứ ba:** viết "HVN GROUP có giải pháp …", không viết "chúng tôi".
+- **Không dùng mã nội bộ:** nhắc giải pháp bằng tham chiếu `[[hvn:S07]]`, không viết "S07" thành chữ (check.ts chặn). Tham chiếu hiện thành tên giải pháp kèm link.
+- **Không quảng cáo:** không dùng "tốt nhất", "hàng đầu", "số 1", "đăng ký ngay", "ưu đãi". Không nêu giá.
+
+Ví dụ nên viết: "Khó theo dõi khách hàng → dùng một CRM; doanh nghiệp nhỏ nên chọn công cụ dễ bắt đầu như Zoho CRM, Pipedrive hoặc HubSpot. HVN GROUP có giải pháp [[hvn:S07]] cho nhu cầu này."
+
+Ví dụ không nên viết: "Chúng tôi khuyên dùng S07, giải pháp CRM tốt nhất của HVN GROUP."
+
 ## Template theo loại
 
 ### `playbook`
